@@ -1,7 +1,7 @@
 "use client";
 import clsx from "clsx";
-import { useEffect, useState, type Dispatch, type SetStateAction } from "react";
-import { notes as t, type noteType } from "~/data/test";
+import { useState, type Dispatch, type SetStateAction } from "react";
+import { type noteType } from "~/data/test";
 import { NoteEdit } from "./NoteEdit";
 import { NotesSidebar } from "./NotesSidebar";
 export interface NProps {
@@ -13,7 +13,7 @@ export interface NProps {
 }
 export const NotesMain = () => {
   const [activeNote, setActiveNote] = useState<noteType | null>(null);
-  const [notes, setNotes] = useState<noteType[]>(t);
+  const [notes, setNotes] = useState<noteType[]>([]);
   const addNote = () => {
     const newNote: noteType = {
       id: crypto.randomUUID(),

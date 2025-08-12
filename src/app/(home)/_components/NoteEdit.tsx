@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import { Button } from "~/components/ui/button";
 import type { NProps } from "./Notes";
 import debounce from "lodash.debounce";
@@ -9,26 +9,34 @@ export const NoteEdit = ({
   setNotes,
 }: Omit<NProps, "setActiveNote" | "notes">) => {
   const editorRef = useRef<HTMLDivElement | null>(null);
-  const handleInput = () => {
-    if (editorRef.current === null) return;
+  const handleInput = useCallback(() => {
+    if (!editorRef.current || !activeNote) return;
     console.log(editorRef.current.innerText);
 
     setNotes((prev) =>
       prev.map((note) =>
-        note.id === activeNote?.id
+        note.id === activeNote.id
           ? { ...note, text: editorRef.current?.innerText ?? "" }
           : note,
       ),
     );
-  };
-  const debouncedHandleInput = debounce(() => handleInput(), 200);
-  // fix debounce behaviour when it switches activeNotes via hooking it up to a current referance.
+  }, [activeNote, setNotes]);
+  const debouncedHandleInput = useMemo(
+    () => debounce(handleInput, 200),
+    [handleInput],
+  );
 
   useEffect(() => {
     if (activeNote && editorRef.current) {
+      editorRef.current.innerText = activeNote.text || "";
       editorRef.current.focus();
     }
   }, [activeNote]);
+  useEffect(() => {
+    return () => {
+      debouncedHandleInput.cancel();
+    };
+  }, [debouncedHandleInput]);
   return (
     <>
       {activeNote ? (
