@@ -1,4 +1,6 @@
+import { relations } from "drizzle-orm";
 import { pgTable, text, timestamp, boolean } from "drizzle-orm/pg-core";
+import { noteTable } from "./notes-schema";
 
 export const user = pgTable("user", {
   id: text("id").primaryKey(),
@@ -58,4 +60,12 @@ export const verification = pgTable("verification", {
   updatedAt: timestamp("updated_at").$defaultFn(
     () => /* @__PURE__ */ new Date(),
   ),
+});
+
+// Relations
+
+export const UserTableRelations = relations(user, ({ many }) => {
+  return {
+    notes: many(noteTable),
+  };
 });

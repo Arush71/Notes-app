@@ -3,12 +3,43 @@ import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useTransition } from "react";
+import { authClient } from "~/lib/auth-client";
+import { Loader } from "lucide-react";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 const SignUpUi = () => {
+  const router = useRouter();
   const [fullname, setFullname] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [emailPending, startEmailTransition] = useTransition();
+
+  function signUpWithEmail() {
+    startEmailTransition(async () => {
+      await authClient.signUp.email(
+        {
+          email,
+          password,
+          name: fullname,
+        },
+        {
+          onSuccess: (data) => {
+            toast.success("Account created successfully!");
+            router.push("/notes");
+            console.log(data);
+            console.log("success!");
+          },
+          onError: (error) => {
+            toast.error(`${error.error.message}`);
+
+            console.log(error);
+          },
+        },
+      );
+    });
+  }
   return (
     <section className="flex min-h-screen bg-zinc-50 px-4 py-16 md:py-32 dark:bg-transparent">
       <form className="bg-muted m-auto h-fit w-full max-w-sm overflow-hidden rounded-[calc(var(--radius)+.125rem)] border shadow-md shadow-zinc-950/5 dark:[--color-muted:var(--color-zinc-900)]">
@@ -76,7 +107,20 @@ const SignUpUi = () => {
               />
             </div>
 
-            <Button className="w-full cursor-pointer">Sign Up</Button>
+            <Button
+              onClick={signUpWithEmail}
+              disabled={emailPending}
+              className="w-full cursor-pointer"
+            >
+              {emailPending ? (
+                <>
+                  <Loader className="size-4 animate-spin" />
+                  <span>Loading...</span>
+                </>
+              ) : (
+                <>Sign Up</>
+              )}
+            </Button>
           </div>
 
           <div className="my-6 grid grid-cols-[1fr_auto_1fr] items-center gap-3">
@@ -121,7 +165,7 @@ const SignUpUi = () => {
           <p className="text-accent-foreground text-center text-sm">
             Have an account ?
             <Button asChild variant="link" className="px-2">
-              <Link href="#">Sign In</Link>
+              <Link href="/sign-in">Sign In</Link>
             </Button>
           </p>
         </div>

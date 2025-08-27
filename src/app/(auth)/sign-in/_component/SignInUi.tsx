@@ -3,11 +3,37 @@ import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useTransition } from "react";
+import { Loader } from "lucide-react";
+import { authClient } from "~/lib/auth-client";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 const SignInUi = () => {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [emailPending, startEmailTransition] = useTransition();
+
+  function signInWithEmail() {
+    startEmailTransition(async () => {
+      await authClient.signIn.email(
+        { email, password },
+        {
+          onSuccess: (data) => {
+            toast.success("Signed in successfully!");
+            router.push("/notes");
+            console.log(data);
+            console.log("success!");
+          },
+          onError: (error) => {
+            toast.error(`${error.error.message}`);
+            console.log(error);
+          },
+        },
+      );
+    });
+  }
   return (
     <section className="flex min-h-screen bg-zinc-50 px-4 py-16 md:py-32 dark:bg-transparent">
       <form className="bg-muted m-auto h-fit w-full max-w-sm overflow-hidden rounded-[calc(var(--radius)+.125rem)] border shadow-md shadow-zinc-950/5 dark:[--color-muted:var(--color-zinc-900)]">
@@ -57,7 +83,20 @@ const SignInUi = () => {
               />
             </div>
 
-            <Button className="w-full cursor-pointer">Sign In</Button>
+            <Button
+              className="w-full cursor-pointer"
+              onClick={signInWithEmail}
+              disabled={emailPending}
+            >
+              {emailPending ? (
+                <>
+                  <Loader className="size-4 animate-spin" />
+                  <span>Loading...</span>
+                </>
+              ) : (
+                <>Sign In</>
+              )}
+            </Button>
           </div>
 
           <div className="my-6 grid grid-cols-[1fr_auto_1fr] items-center gap-3">
@@ -102,7 +141,7 @@ const SignInUi = () => {
           <p className="text-accent-foreground text-center text-sm">
             Don&apos;t have an account ?
             <Button asChild variant="link" className="px-2">
-              <Link href="#">Create account</Link>
+              <Link href="/sign-up">Create account</Link>
             </Button>
           </p>
         </div>

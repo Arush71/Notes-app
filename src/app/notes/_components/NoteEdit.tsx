@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef } from "react";
 import { Button } from "~/components/ui/button";
 import type { NProps } from "./Notes";
 import debounce from "lodash.debounce";
+import { useSignout } from "~/hooks/use-signout";
 
 export const NoteEdit = ({
   activeNote,
@@ -37,6 +38,7 @@ export const NoteEdit = ({
       debouncedHandleInput.cancel();
     };
   }, [debouncedHandleInput]);
+  const handleSignOut = useSignout();
   return (
     <>
       {activeNote ? (
@@ -68,6 +70,13 @@ export const NoteEdit = ({
             onClick={addNote}
           >
             Create new note
+          </Button>
+          <Button
+            variant={"destructive"}
+            className="cursor-pointer"
+            onClick={handleSignOut}
+          >
+            Logout
           </Button>
         </>
       )}
