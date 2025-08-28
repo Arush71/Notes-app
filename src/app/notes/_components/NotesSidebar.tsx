@@ -2,16 +2,28 @@ import clsx from "clsx";
 import { Plus } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
-import { formatDate } from "~/data/test";
-import type { NProps } from "./Notes";
+import { formatDate, type noteType } from "~/data/test";
 import { useMemo, useState } from "react";
 
+interface SidebarProps {
+  activeNoteId: string | null;
+  setActiveNoteId: (id: string | null) => void;
+  notes: noteType[];
+  setNotes: (updater: (prev: noteType[]) => noteType[]) => void;
+  addNote: () => void;
+  livePreview: {
+    id: string;
+    text: string;
+  } | null;
+}
+
 export const NotesSidebar = ({
-  activeNote,
-  setActiveNote,
+  activeNoteId,
+  setActiveNoteId,
   notes,
   addNote,
-}: NProps) => {
+  livePreview,
+}: SidebarProps) => {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const filteredList = useMemo(() => {
     const term = searchTerm.toLowerCase();
@@ -58,17 +70,19 @@ export const NotesSidebar = ({
         {notes.length ? (
           <ul>
             {filteredList.map((note) => {
-              const { title, description } = parseNote(note.text);
+              const previewText =
+                livePreview?.id === note.id ? livePreview.text : note.text;
+              const { title, description } = parseNote(previewText);
               return (
                 <li
                   key={note.id}
                   className={clsx(
                     "flex cursor-pointer flex-col gap-1 border-b-[1.25px] border-b-gray-800 px-4 py-3 hover:bg-zinc-900",
                     {
-                      "!bg-accent !hover:bg-accent": note.id === activeNote?.id,
+                      "!bg-accent !hover:bg-accent": note.id === activeNoteId,
                     },
                   )}
-                  onClick={() => setActiveNote(note)}
+                  onClick={() => setActiveNoteId(note.id)}
                 >
                   <h3 className="truncate font-medium text-white">{title}</h3>
                   <div className="flex text-xs text-gray-400">

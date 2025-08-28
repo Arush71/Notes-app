@@ -1,18 +1,39 @@
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  type Dispatch,
+  type SetStateAction,
+} from "react";
 import { Button } from "~/components/ui/button";
-import type { NProps } from "./Notes";
 import debounce from "lodash.debounce";
 import { useSignout } from "~/hooks/use-signout";
+import type { noteType } from "~/data/test";
+
+interface NoteEditProps {
+  activeNote: noteType | null; // now derived by parent
+  addNote: () => void;
+  setNotes: (updater: (prev: noteType[]) => noteType[]) => void;
+  notes: noteType[];
+  setLivePreview: Dispatch<
+    SetStateAction<{
+      id: string;
+      text: string;
+    } | null>
+  >;
+  setActiveNoteId: (id: string | null) => void; // optional if you need to change active
+}
 
 export const NoteEdit = ({
   activeNote,
   addNote,
   setNotes,
-}: Omit<NProps, "setActiveNote" | "notes">) => {
+  setLivePreview,
+}: NoteEditProps) => {
   const editorRef = useRef<HTMLDivElement | null>(null);
   const handleInput = useCallback(() => {
     if (!editorRef.current || !activeNote) return;
-    console.log(editorRef.current.innerText);
 
     setNotes((prev) =>
       prev.map((note) =>
@@ -23,21 +44,53 @@ export const NoteEdit = ({
     );
   }, [activeNote, setNotes]);
   const debouncedHandleInput = useMemo(
-    () => debounce(handleInput, 200),
+    () => debounce(handleInput, 3000),
     [handleInput],
   );
-
+  function placeCaretAtEnd(el: HTMLElement) {
+    if (!el) return;
+    const range = document.createRange();
+    const selection = window.getSelection();
+    range.selectNodeContents(el);
+    range.collapse(false); // collapse to end
+    selection?.removeAllRanges();
+    selection?.addRange(range);
+  }
   useEffect(() => {
-    if (activeNote && editorRef.current) {
-      editorRef.current.innerText = activeNote.text || "";
-      editorRef.current.focus();
-    }
+    if (!editorRef.current) return;
+    const editorEl = editorRef.current;
+    editorRef.current.innerText = activeNote?.text ?? "";
+
+    editorRef.current.focus();
+    placeCaretAtEnd(editorRef.current);
+
+    return () => {
+      debouncedHandleInput.flush();
+      if (activeNote?.id && editorEl) {
+        if (editorEl.innerText.trim() !== activeNote.text.trim()) {
+          const textToSave = editorEl.innerText ?? "";
+          setNotes((prev) =>
+            prev.map((note) =>
+              note.id === activeNote.id ? { ...note, text: textToSave } : note,
+            ),
+          );
+        }
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeNote]);
   useEffect(() => {
     return () => {
       debouncedHandleInput.cancel();
     };
   }, [debouncedHandleInput]);
+  const handleLivePreview = useCallback(() => {
+    if (!editorRef.current || !activeNote) return;
+
+    const text = editorRef.current.innerText ?? "";
+    setLivePreview({ id: activeNote.id, text });
+    debouncedHandleInput();
+  }, [activeNote, debouncedHandleInput, setLivePreview]);
   const handleSignOut = useSignout();
   return (
     <>
@@ -49,16 +102,15 @@ export const NoteEdit = ({
           <div
             ref={editorRef}
             contentEditable
-            onInput={debouncedHandleInput}
+            onInput={handleLivePreview}
             className="w-full flex-1 self-start p-5 text-xl leading-relaxed text-white outline-none"
             style={{
               whiteSpace: "pre-wrap",
               wordBreak: "break-word",
             }}
             suppressContentEditableWarning={true}
-          >
-            {activeNote.text}
-          </div>
+            // onBlur={handleInput} Causes focus problems
+          />
         </>
       ) : (
         <>

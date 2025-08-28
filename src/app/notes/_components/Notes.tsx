@@ -5,15 +5,19 @@ import { type noteType } from "~/data/test";
 import { NoteEdit } from "./NoteEdit";
 import { NotesSidebar } from "./NotesSidebar";
 export interface NProps {
-  activeNote: noteType | null;
-  setActiveNote: Dispatch<SetStateAction<noteType | null>>;
+  activeNoteId: string | null;
+  setActiveNoteId: Dispatch<SetStateAction<string | null>>;
   notes: noteType[];
   setNotes: Dispatch<SetStateAction<noteType[]>>;
   addNote: () => void;
 }
 export const NotesMain = () => {
-  const [activeNote, setActiveNote] = useState<noteType | null>(null);
+  const [activeNoteId, setActiveNoteId] = useState<string | null>(null);
   const [notes, setNotes] = useState<noteType[]>([]);
+  const [livePreview, setLivePreview] = useState<{
+    id: string;
+    text: string;
+  } | null>(null);
   const addNote = () => {
     const newNote: noteType = {
       id: crypto.randomUUID(),
@@ -21,15 +25,17 @@ export const NotesMain = () => {
       text: "",
     };
     setNotes((prev) => [...prev, newNote]);
-    setActiveNote(newNote);
+    setActiveNoteId(newNote.id);
   };
+  const activeNote = notes.find((n) => n.id === activeNoteId) ?? null;
   return (
     <>
       <div className="flex w-1/5 min-w-64 flex-col border-r-[3px] border-zinc-800 shadow-2xl">
         <NotesSidebar
+          livePreview={livePreview}
           notes={notes}
-          activeNote={activeNote}
-          setActiveNote={setActiveNote}
+          activeNoteId={activeNoteId}
+          setActiveNoteId={setActiveNoteId}
           setNotes={setNotes}
           addNote={addNote}
         />
@@ -41,9 +47,12 @@ export const NotesMain = () => {
         })}
       >
         <NoteEdit
+          setLivePreview={setLivePreview}
           setNotes={setNotes}
           addNote={addNote}
           activeNote={activeNote}
+          notes={notes}
+          setActiveNoteId={setActiveNoteId}
         />
       </div>
     </>
