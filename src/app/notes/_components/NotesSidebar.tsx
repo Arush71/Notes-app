@@ -2,15 +2,23 @@ import clsx from "clsx";
 import { Plus } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
-import { formatDate, type noteType } from "~/data/test";
+import { formatDate } from "~/data/test";
 import { useMemo, useState } from "react";
-
+import { useNotes } from "~/hooks/useNotes";
+import type { UseMutationResult } from "@tanstack/react-query";
+import type { Note } from "~/types/notes.types";
 interface SidebarProps {
   activeNoteId: string | null;
   setActiveNoteId: (id: string | null) => void;
-  notes: noteType[];
-  setNotes: (updater: (prev: noteType[]) => noteType[]) => void;
-  addNote: () => void;
+
+  addNote: UseMutationResult<
+    Note[],
+    Error,
+    void,
+    {
+      prevNote: Note[];
+    }
+  >;
   livePreview: {
     id: string;
     text: string;
@@ -20,15 +28,17 @@ interface SidebarProps {
 export const NotesSidebar = ({
   activeNoteId,
   setActiveNoteId,
-  notes,
-  addNote,
+
   livePreview,
+  addNote,
 }: SidebarProps) => {
+  const { data: notes } = useNotes();
   const [searchTerm, setSearchTerm] = useState<string>("");
-  const filteredList = useMemo(() => {
-    const term = searchTerm.toLowerCase();
-    return notes.filter((note) => note.text.toLowerCase().includes(term));
-  }, [searchTerm, notes]);
+  const filteredList =
+    useMemo(() => {
+      const term = searchTerm.toLowerCase();
+      return notes?.filter((note) => note.text.toLowerCase().includes(term));
+    }, [searchTerm, notes]) ?? [];
   const parseNote = (text: string) => {
     const lines = text
       .split(/\r?\n/)
@@ -61,13 +71,14 @@ export const NotesSidebar = ({
           variant={"ghost"}
           size={"icon"}
           className="cursor-pointer rounded-full"
-          onClick={addNote}
+          onClick={() => addNote.mutate()}
+          disabled={addNote.isPending}
         >
           <Plus className="size-5 text-yellow-400" />
         </Button>
       </div>
       <div className="flex-1 overflow-y-auto">
-        {notes.length ? (
+        {notes?.length ? (
           <ul>
             {filteredList.map((note) => {
               const previewText =
@@ -86,7 +97,7 @@ export const NotesSidebar = ({
                 >
                   <h3 className="truncate font-medium text-white">{title}</h3>
                   <div className="flex text-xs text-gray-400">
-                    <span>{formatDate(note.dateCreated)}</span>
+                    <span>{formatDate(note.updatedAt)}</span>
                     <span className="mx-1">•</span>
                     <span className="truncate">{description}</span>
                   </div>

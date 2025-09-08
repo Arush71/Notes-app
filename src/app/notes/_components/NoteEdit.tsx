@@ -9,13 +9,21 @@ import {
 import { Button } from "~/components/ui/button";
 import debounce from "lodash.debounce";
 import { useSignout } from "~/hooks/use-signout";
-import type { noteType } from "~/data/test";
+import type { Note } from "~/types/notes.types";
+import type { UseMutationResult } from "@tanstack/react-query";
 
 interface NoteEditProps {
-  activeNote: noteType | null; // now derived by parent
-  addNote: () => void;
-  setNotes: (updater: (prev: noteType[]) => noteType[]) => void;
-  notes: noteType[];
+  activeNote: Note | null; // now derived by parent
+  addNote: UseMutationResult<
+    Note[],
+    Error,
+    void,
+    {
+      prevNote: Note[];
+    }
+  >;
+  // setNotes: (updater: (prev: noteType[]) => noteType[]) => void;
+
   setLivePreview: Dispatch<
     SetStateAction<{
       id: string;
@@ -28,21 +36,21 @@ interface NoteEditProps {
 export const NoteEdit = ({
   activeNote,
   addNote,
-  setNotes,
+  // setNotes,
   setLivePreview,
 }: NoteEditProps) => {
   const editorRef = useRef<HTMLDivElement | null>(null);
   const handleInput = useCallback(() => {
     if (!editorRef.current || !activeNote) return;
 
-    setNotes((prev) =>
-      prev.map((note) =>
-        note.id === activeNote.id
-          ? { ...note, text: editorRef.current?.innerText ?? "" }
-          : note,
-      ),
-    );
-  }, [activeNote, setNotes]);
+    // setNotes((prev) =>
+    //   prev.map((note) =>
+    //     note.id === activeNote.id
+    //       ? { ...note, text: editorRef.current?.innerText ?? "" }
+    //       : note,
+    //   ),
+    // );
+  }, [activeNote]);
   const debouncedHandleInput = useMemo(
     () => debounce(handleInput, 3000),
     [handleInput],
@@ -69,11 +77,11 @@ export const NoteEdit = ({
       if (activeNote?.id && editorEl) {
         if (editorEl.innerText.trim() !== activeNote.text.trim()) {
           const textToSave = editorEl.innerText ?? "";
-          setNotes((prev) =>
-            prev.map((note) =>
-              note.id === activeNote.id ? { ...note, text: textToSave } : note,
-            ),
-          );
+          // setNotes((prev) =>
+          //   prev.map((note) =>
+          //     note.id === activeNote.id ? { ...note, text: textToSave } : note,
+          //   ),
+          // );
         }
       }
     };
@@ -97,7 +105,7 @@ export const NoteEdit = ({
       {activeNote ? (
         <>
           <span className="text-sm text-zinc-400">
-            {new Date(activeNote.dateCreated).toLocaleString()}
+            {new Date(activeNote.updatedAt).toLocaleString()}
           </span>
           <div
             ref={editorRef}
@@ -119,7 +127,8 @@ export const NoteEdit = ({
           </span>
           <Button
             className="cursor-pointer bg-yellow-500 font-normal text-black hover:bg-yellow-600"
-            onClick={addNote}
+            onClick={() => addNote.mutate()}
+            disabled={addNote.isPending}
           >
             Create new note
           </Button>

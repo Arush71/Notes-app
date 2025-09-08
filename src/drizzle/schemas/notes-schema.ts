@@ -4,7 +4,7 @@ import { relations } from "drizzle-orm";
 
 export const noteTable = pgTable("notes", {
   id: uuid("id").primaryKey().defaultRandom(),
-  text: text("content"),
+  text: text("content").notNull(),
   createdAt: timestamp("createdAt", { withTimezone: true })
     .defaultNow()
     .notNull(),
