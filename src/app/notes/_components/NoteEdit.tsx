@@ -30,7 +30,6 @@ interface NoteEditProps {
       text: string;
     } | null>
   >;
-  setActiveNoteId: (id: string | null) => void; // optional if you need to change active
 }
 
 export const NoteEdit = ({

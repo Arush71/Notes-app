@@ -14,7 +14,7 @@ export const NotesMain = ({ userId }: { userId: string }) => {
     id: string;
     text: string;
   } | null>(null);
-  const addNote = useAddNote(userId);
+  const addNote = useAddNote(userId, setActiveNoteId);
   const activeNote = notes?.find((n) => n.id === activeNoteId) ?? null;
   return (
     <main className="h-screen">
@@ -37,7 +37,6 @@ export const NotesMain = ({ userId }: { userId: string }) => {
             setLivePreview={setLivePreview}
             addNote={addNote}
             activeNote={activeNote}
-            setActiveNoteId={setActiveNoteId}
           />
         </div>
       </div>
