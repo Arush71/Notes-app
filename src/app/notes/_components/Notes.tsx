@@ -1,20 +1,10 @@
 "use client";
 import clsx from "clsx";
-import { useState, type Dispatch, type SetStateAction } from "react";
-import { type noteType } from "~/data/test";
+import { useState } from "react";
 import { NoteEdit } from "./NoteEdit";
 import { NotesSidebar } from "./NotesSidebar";
-import type { Note } from "~/types/notes.types";
 import { useNotes } from "~/hooks/useNotes";
 import { useAddNote } from "~/hooks/useAddNote";
-
-export interface NProps {
-  activeNoteId: string | null;
-  setActiveNoteId: Dispatch<SetStateAction<string | null>>;
-  initialNotes: Note[];
-  setNotes: Dispatch<SetStateAction<noteType[]>>;
-  addNote: () => void;
-}
 
 export const NotesMain = ({ userId }: { userId: string }) => {
   const [activeNoteId, setActiveNoteId] = useState<string | null>(null);
