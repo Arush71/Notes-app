@@ -34,6 +34,7 @@ export const NotesMain = ({ userId }: { userId: string }) => {
           })}
         >
           <NoteEdit
+            userId={userId}
             setLivePreview={setLivePreview}
             addNote={addNote}
             activeNote={activeNote}

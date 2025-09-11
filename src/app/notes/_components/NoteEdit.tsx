@@ -11,8 +11,10 @@ import debounce from "lodash.debounce";
 import { useSignout } from "~/hooks/use-signout";
 import type { Note } from "~/types/notes.types";
 import type { UseMutationResult } from "@tanstack/react-query";
+import { useEditNote } from "~/hooks/useEditNote";
 
 interface NoteEditProps {
+  userId: string;
   activeNote: Note | null; // now derived by parent
   addNote: UseMutationResult<
     Note[],
@@ -35,9 +37,10 @@ interface NoteEditProps {
 export const NoteEdit = ({
   activeNote,
   addNote,
-  // setNotes,
   setLivePreview,
+  userId,
 }: NoteEditProps) => {
+  const editNote = useEditNote();
   const editorRef = useRef<HTMLDivElement | null>(null);
   const handleInput = useCallback(() => {
     if (!editorRef.current || !activeNote) return;
@@ -49,6 +52,11 @@ export const NoteEdit = ({
     //       : note,
     //   ),
     // );
+    editNote.mutate({
+      noteId: activeNote.id,
+      text: editorRef.current.innerText,
+      userId,
+    });
   }, [activeNote]);
   const debouncedHandleInput = useMemo(
     () => debounce(handleInput, 3000),
@@ -81,6 +89,11 @@ export const NoteEdit = ({
           //     note.id === activeNote.id ? { ...note, text: textToSave } : note,
           //   ),
           // );
+          editNote.mutate({
+            noteId: activeNote.id,
+            text: textToSave,
+            userId,
+          });
         }
       }
     };
