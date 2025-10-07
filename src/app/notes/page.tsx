@@ -3,7 +3,6 @@ import { NotesMain } from "./_components/Notes";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { getAllNotes } from "../data/notes/getAllNotes";
-import type { Note } from "~/types/notes.types";
 import { getQueryClient } from "~/providers/get-query-client";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 
@@ -13,12 +12,6 @@ export default async function HomePage() {
   });
   if (!session) return redirect("/sign-in");
 
-  // let notes: Note[] = [];
-  // try {
-  //   notes = await getAllNotes(session.user.id);
-  // } catch {
-  //   notes = [];
-  // }
   const queryClient = getQueryClient();
   await queryClient.prefetchQuery({
     queryKey: ["notes"],
