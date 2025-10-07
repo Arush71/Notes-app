@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "allowImportingTsExtensions": true,
     /* Base Options: */
     "esModuleInterop": true,
     "skipLibCheck": true,
@@ -25,7 +26,6 @@
     "incremental": true,
 
     /* Path Aliases */
-    "baseUrl": ".",
     "paths": {
       "~/*": ["./src/*"]
     }
