@@ -8,7 +8,7 @@ Designed to demonstrate **end-to-end data flow**, **modern React architecture**,
 
 ## 🚀 Live Demo
 
-👉 https://<your-deployment-link>
+👉 https://notly-notes-app.vercel.app/
 
 ---
 
