@@ -23,7 +23,6 @@ export const editNoteFn = async (
     if (!editNoteB) {
       throw new Error("Failed to edit the Note.");
     }
-    console.log("note called");
   } catch {
     throw new Error("Failed to edit the Note.");
   }

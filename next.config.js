@@ -10,6 +10,7 @@ const config = {
     ignoreBuildErrors: true,
   },
   eslint: {
+    // Keep deploys unblocked even if lint issues remain.
     ignoreDuringBuilds: true,
   },
 };

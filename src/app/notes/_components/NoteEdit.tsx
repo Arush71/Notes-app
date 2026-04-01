@@ -12,6 +12,7 @@ import { useSignout } from "~/hooks/use-signout";
 import type { Note } from "~/types/notes.types";
 import type { UseMutationResult } from "@tanstack/react-query";
 import { useEditNote } from "~/hooks/useEditNote";
+import { ChevronLeft } from "lucide-react";
 
 interface NoteEditProps {
   userId: string;
@@ -32,6 +33,7 @@ interface NoteEditProps {
       text: string;
     } | null>
   >;
+  onMobileBack?: () => void;
 }
 
 export const NoteEdit = ({
@@ -39,6 +41,7 @@ export const NoteEdit = ({
   addNote,
   setLivePreview,
   userId,
+  onMobileBack,
 }: NoteEditProps) => {
   const editNote = useEditNote();
   const editorRef = useRef<HTMLDivElement | null>(null);
@@ -116,6 +119,17 @@ export const NoteEdit = ({
     <>
       {activeNote ? (
         <>
+          <div className="flex w-full items-center px-3 md:hidden">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="gap-1 text-gray-400 hover:text-white"
+              onClick={onMobileBack}
+            >
+              <ChevronLeft className="size-4" />
+              Notes
+            </Button>
+          </div>
           <span className="text-sm text-zinc-400">
             {new Date(activeNote.updatedAt).toLocaleString()}
           </span>
