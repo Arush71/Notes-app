@@ -9,10 +9,6 @@ const config = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  eslint: {
-    // Keep deploys unblocked even if lint issues remain.
-    ignoreDuringBuilds: true,
-  },
 };
 
 export default config;
